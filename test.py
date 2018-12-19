@@ -9,7 +9,6 @@ with open('token.txt', 'r') as tokenfile:
 	TOKEN = (tokenfile.read()).strip("\n")
 	print(TOKEN)
 	
-idpatarotage="374187578846347264"
 description = '''Bot Python'''
 bot = commands.Bot(command_prefix='?', description=description)
 @bot.event
@@ -55,7 +54,7 @@ async def purge(ctx, n: int, usr=None):
 	await bot.say('Deleted {} message(s)'.format(len(msg)))
 @bot.command()
 async def exit():
-	bot.close()
+	bot.logout()
 @bot.command(pass_context = True)
 async def clear(ctx, number):
     mgs = [] #Empty list to put all the messages in the log
