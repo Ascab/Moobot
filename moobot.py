@@ -3,21 +3,25 @@ from discord.ext import commands
 import os
 import time
 from datetime import datetime
+import sys
+import asyncio
 
-os.chdir("/home/ascab/Documents/BotSondage")
+os.chdir("/home/ascab/Documents/Moobot")
 with open('token.txt', 'r') as tokenfile:
 	TOKEN = (tokenfile.read()).strip("\n")
-	print(TOKEN)
 	
 description = '''Bot Python'''
 bot = commands.Bot(command_prefix='?', description=description)
+    
 @bot.event
 async def on_ready():
-    print('Logged in as')
-    print(bot.user.name)	
-    print(bot.user.id)
-    print (discord.__version__)
-    print('------')
+	timestamp = time.time()
+	utctime = datetime.utcfromtimestamp(timestamp-(12*3600))
+	print('Logged in as at'+ str(utctime))
+	print(bot.user.name)	
+	print(bot.user.id)
+	print (discord.__version__)
+	print('------')
     
 
 @bot.command()
@@ -38,23 +42,29 @@ def is_he(m, usr: discord.Member):
 	return m.author == usr 
 @bot.command(pass_context=True)
 async def purge(ctx, n: int, usr=None):
+	""" """
 	channel=ctx.message.channel
 	timestamp = time.time()
 	utctime = datetime.utcfromtimestamp(timestamp-(12*3600))
 	msg = []
 	if usr!=None :
 		target = ctx.message.mentions.pop().id
-		async for x in bot.logs_from(ctx.message.channel, limit = int(n), before=ctx.message ,after=utctime, around=None) : 
-			if x.author.id == target : 
+		print('if n=',n)
+		print(target)
+		async for x in bot.logs_from(channel, limit = int(n), before=ctx.message ,after=utctime, around=None) : 
+			if x.author.id == target :
 				msg.append(x)
 	else :
+		print('else n=',n)
 		async for x in bot.logs_from(channel, limit=int(n), before=ctx.message ,after=utctime, around=None) :
 		 	msg.append(x)	 	
 	await bot.delete_messages(msg)
 	await bot.say('Deleted {} message(s)'.format(len(msg)))
 @bot.command()
 async def exit():
-	bot.logout()
+	"""Deconnecte le bot et coupe le programme"""
+	await bot.say('Au revoir')
+	await bot.close() 
 @bot.command(pass_context = True)
 async def clear(ctx, number):
     mgs = [] #Empty list to put all the messages in the log
@@ -64,5 +74,9 @@ async def clear(ctx, number):
     await bot.delete_messages(mgs)
 @bot.command(pass_context=True)
 async def robin(ctx) :
-	await bot.send_message(discord.Object(id='374187578846347266'), 'Bon anniversaire'+ ctx.message.server.get_member('184685136372039680').mention + 'fait peter le champagne !')
+	await bot.send_message(discord.Object(id='524866929085775872'), 'Bon anniversaire'+ ctx.message.server.get_member('184685136372039680').mention + 'fait peter le champagne !')
+@bot.command(pass_context=True)
+async def kick(ctx) :
+	for target in ctx.message.mentions :
+		await bot.kick(target)
 bot.run(TOKEN)
