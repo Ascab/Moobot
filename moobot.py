@@ -16,8 +16,8 @@ bot = commands.Bot(command_prefix='?', description=description)
 @bot.event
 async def on_ready():
 	timestamp = time.time()
-	utctime = datetime.utcfromtimestamp(timestamp-(12*3600))
-	print('Logged in as at'+ str(utctime))
+	utctime = datetime.utcfromtimestamp(timestamp)
+	print('Logged in as at '+ str(utctime) + 'UTC')
 	print(bot.user.name)	
 	print(bot.user.id)
 	print (discord.__version__)
@@ -40,26 +40,33 @@ def is_me(m):
     return m.author == bot.user
 def is_he(m, usr: discord.Member):
 	return m.author == usr 
+	
+async def del_msgs(msg, l) :
+	if l == 1 :
+		await bot.delete_message(msg.pop())
+	elif l >= 2 :
+		await bot.delete_messages(msg)
 @bot.command(pass_context=True)
 async def purge(ctx, n: int, usr=None):
-	""" """
+	"""?purge <n> [usr] : Supprime number messages. Si un utilisateur est mentionné 
+	supprime nomber message de user"""
 	channel=ctx.message.channel
 	timestamp = time.time()
 	utctime = datetime.utcfromtimestamp(timestamp-(12*3600))
 	msg = []
 	if usr!=None :
 		target = ctx.message.mentions.pop().id
-		print('if n=',n)
 		print(target)
 		async for x in bot.logs_from(channel, limit = int(n), before=ctx.message ,after=utctime, around=None) : 
 			if x.author.id == target :
 				msg.append(x)
 	else :
-		print('else n=',n)
 		async for x in bot.logs_from(channel, limit=int(n), before=ctx.message ,after=utctime, around=None) :
-		 	msg.append(x)	 	
-	await bot.delete_messages(msg)
-	await bot.say('Deleted {} message(s)'.format(len(msg)))
+		 	msg.append(x)
+	length=len(msg)	 	
+	await del_msgs(msg, length)
+	await bot.say('Deleted {} message(s)'.format(length))
+	print('Deleted {} message(s) at {} :'.format(length, datetime.utcfromtimestamp(timestamp)))
 @bot.command()
 async def exit():
 	"""Deconnecte le bot et coupe le programme"""
